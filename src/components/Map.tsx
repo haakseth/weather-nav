@@ -68,7 +68,9 @@ class Map extends React.Component<any, MapState> {
   addPopup(lngLat: LngLat) {
     let popup = new mapboxgl.Popup({ closeOnClick: false })
       .setLngLat(lngLat)
-      .setHTML(`<h3> Latitude: ${lngLat.lat}, Longitude: ${lngLat.lng}</h3><p>asdf</p>');
+      .setHTML(
+        `<h3>${lngLat.lat.toFixed(4)}, ${lngLat.lng.toFixed(4)}</h3><p>asdf</p>`
+      );
     popup.addTo(this.map);
   }
   componentDidMount() {
