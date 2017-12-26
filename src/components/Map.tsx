@@ -65,14 +65,11 @@ class Map extends React.Component<any, MapState> {
       sidebarToggled: false
     });
   }
-  addMarker(lngLat: LngLat) {
-    var el = document.createElement('div');
-    el.className = 'marker';
-    let marker = new mapboxgl.Marker(el).setLngLat(lngLat).setPopup(
-      new mapboxgl.Popup({ offset: 25 }) // add popups
-        .setHTML('<h3>' + 'asdfasdf' + '</h3><p>' + 'asdfkkfkfdasd' + '</p>')
-    );
-    marker.addTo(this.map);
+  addPopup(lngLat: LngLat) {
+    let popup = new mapboxgl.Popup({ closeOnClick: false })
+      .setLngLat(lngLat)
+      .setHTML('<h3>' + 'asdfasdf' + '</h3><p>' + 'asdfkkfkfdasd' + '</p>');
+    popup.addTo(this.map);
   }
   componentDidMount() {
     let { lng, lat, zoom } = this.state;
@@ -94,7 +91,7 @@ class Map extends React.Component<any, MapState> {
     });
     // let that = this;
     this.map.on('click', (event: MapMouseEvent) => {
-      this.addMarker(event.lngLat);
+      this.addPopup(event.lngLat);
     });
   }
 

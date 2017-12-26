@@ -13,7 +13,7 @@ class Sidebar extends React.Component<SidebarProps, any> {
   }
   render() {
     return (
-      <Drawer open={this.props.toggled} type="temporary">
+      <Drawer open={this.props.toggled} type="persistent">
         <Button onClick={this.props.close}>
           <LeftIcon />Close
         </Button>
