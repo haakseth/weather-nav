@@ -1,12 +1,14 @@
 /* tslint:disable no-any */
 /* tslint:disable no-console */
 import * as React from 'react';
+import { renderToString } from 'react-dom/server';
 import * as mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import config from '../config.json';
 import Button from 'material-ui/IconButton';
 import MenuIcon from 'material-ui-icons/Menu';
 import Sidebar from './Sidebar';
+import Popup from './Popup';
 import { LngLat, MapMouseEvent } from 'mapbox-gl/dist/mapbox-gl';
 
 (mapboxgl as any).accessToken = config.mapboxToken;
@@ -23,7 +25,9 @@ class Map extends React.Component<any, MapState> {
       sidebarToggled: false
     };
   }
-
+  renderPopupHtml(lngLat: LngLat) {
+    return renderToString(<Popup lngLat={lngLat} />);
+  }
   componentWillMount() {
     fetch('http://freegeoip.net/json/')
       .then((response: any) => {
@@ -66,11 +70,9 @@ class Map extends React.Component<any, MapState> {
     });
   }
   addPopup(lngLat: LngLat) {
-    let popup = new mapboxgl.Popup({ closeOnClick: false })
+    let popup = new mapboxgl.Popup({ closeOnClick: true })
       .setLngLat(lngLat)
-      .setHTML(
-        `<h3>${lngLat.lat.toFixed(4)}, ${lngLat.lng.toFixed(4)}</h3><p>asdf</p>`
-      );
+      .setHTML(this.renderPopupHtml(lngLat));
     popup.addTo(this.map);
   }
   componentDidMount() {
@@ -139,6 +141,8 @@ interface MapState {
   lat: number;
   zoom: number;
   sidebarToggled: boolean;
+  originPoint?: LngLat;
+  destinationPoint?: LngLat;
 }
 
 interface GeoIp {
