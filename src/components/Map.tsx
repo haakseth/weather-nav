@@ -9,7 +9,7 @@ import Button from 'material-ui/IconButton';
 import MenuIcon from 'material-ui-icons/Menu';
 import Sidebar from './Sidebar';
 import Popup from './Popup';
-import { LngLat, MapMouseEvent } from 'mapbox-gl/dist/mapbox-gl';
+import { LngLat, MapMouseEvent, Marker } from 'mapbox-gl/dist/mapbox-gl';
 
 (mapboxgl as any).accessToken = config.mapboxToken;
 
@@ -22,7 +22,10 @@ class Map extends React.Component<any, MapState> {
       lng: 10.2,
       lat: 56.2,
       zoom: 6.4,
-      sidebarToggled: false
+      sidebarToggled: false,
+      destinationPoint: undefined,
+      originPoint: undefined,
+      mapMarkers: []
     };
   }
   renderPopupHtml(lngLat: LngLat) {
@@ -44,12 +47,29 @@ class Map extends React.Component<any, MapState> {
         });
       });
   }
+
   componentWillUpdate(nextProps: any, nextState: MapState) {
     if (this.state.lat !== nextState.lat || this.state.lng !== nextState.lng) {
       this.map.setCenter(new mapboxgl.LngLat(nextState.lng, nextState.lat));
-      // this.map.setZoom(12);
     }
+
+    // add new markers:
+    let newMarkers = nextState.mapMarkers.filter(
+      e => !this.state.mapMarkers.find(a => e === a)
+    );
+    newMarkers.forEach(newMarker => {
+      newMarker.addTo(this.map);
+    });
+
+    // remove removed layers:
+    let removedMarkers = this.state.mapMarkers.filter(
+      e => !nextState.mapMarkers.find(a => e === a)
+    );
+    removedMarkers.forEach(removedMarker => {
+      removedMarker.remove();
+    });
   }
+
   toggleSidebar() {
     if (this.state.sidebarToggled) {
       this.setState({
@@ -63,18 +83,65 @@ class Map extends React.Component<any, MapState> {
       });
     }
   }
+
   closeSidebar() {
     this.setState({
       ...this.state,
       sidebarToggled: false
     });
   }
+
+  resetAndClose() {
+    this.setState({
+      ...this.state,
+      originPoint: undefined,
+      destinationPoint: undefined,
+      mapMarkers: [],
+      sidebarToggled: false
+    });
+  }
+
   addPopup(lngLat: LngLat) {
     let popup = new mapboxgl.Popup({ closeOnClick: true })
       .setLngLat(lngLat)
       .setHTML(this.renderPopupHtml(lngLat));
     popup.addTo(this.map);
   }
+
+  addOriginOrDestination(lngLat: LngLat) {
+    if (!this.state.originPoint) {
+      this.setState({
+        ...this.state,
+        originPoint: lngLat,
+        sidebarToggled: true
+      });
+    } else if (!this.state.destinationPoint) {
+      this.setState({
+        ...this.state,
+        destinationPoint: lngLat,
+        sidebarToggled: true
+      });
+    } else {
+      this.setState({
+        ...this.state,
+        destinationPoint: undefined,
+        originPoint: undefined
+      });
+      this.addOriginOrDestination(lngLat);
+    }
+    let markers = Array<Marker>();
+    if (this.state.originPoint) {
+      markers.push(new Marker().setLngLat(this.state.originPoint));
+    }
+    if (this.state.destinationPoint) {
+      markers.push(new Marker().setLngLat(this.state.destinationPoint));
+    }
+    this.setState({
+      ...this.state,
+      mapMarkers: markers
+    });
+  }
+
   componentDidMount() {
     let { lng, lat, zoom } = this.state;
     this.map = new mapboxgl.Map({
@@ -95,7 +162,8 @@ class Map extends React.Component<any, MapState> {
     });
     // let that = this;
     this.map.on('click', (event: MapMouseEvent) => {
-      this.addPopup(event.lngLat);
+      // this.addPopup(event.lngLat);
+      this.addOriginOrDestination(event.lngLat);
     });
   }
 
@@ -127,6 +195,11 @@ class Map extends React.Component<any, MapState> {
           close={() => {
             this.closeSidebar();
           }}
+          resetAndClose={() => {
+            this.resetAndClose();
+          }}
+          originPoint={this.state.originPoint}
+          destinationPoint={this.state.destinationPoint}
         />
         <div style={style} ref={el => (this.mapContainer = el)} />
       </div>
@@ -143,8 +216,8 @@ interface MapState {
   sidebarToggled: boolean;
   originPoint?: LngLat;
   destinationPoint?: LngLat;
+  mapMarkers: Array<Marker>;
 }
-
 interface GeoIp {
   ip: string;
   country_code: string;

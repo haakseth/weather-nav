@@ -2,29 +2,75 @@
 import * as React from 'react';
 import Drawer from 'material-ui/Drawer';
 import List, { ListItem } from 'material-ui/List';
-import Button from 'material-ui/Button';
-import InboxIcon from 'material-ui-icons/Inbox';
-import DraftsIcon from 'material-ui-icons/Drafts';
 import LeftIcon from 'material-ui-icons/ChevronLeft';
+import { LngLat } from 'mapbox-gl';
+import DestinationCard from './DestinationCard';
 
-class Sidebar extends React.Component<SidebarProps, any> {
+class Sidebar extends React.Component<SidebarProps, SidebarState> {
   constructor(props: any) {
     super(props);
+    this.state = {
+      closeButtonHover: false,
+      resetButtonHover: false
+    };
+  }
+  toggleClosebuttonHover() {
+    this.setState({
+      ...this.state,
+      closeButtonHover: !this.state.closeButtonHover
+    });
+  }
+  toggleResetButtonHover() {
+    this.setState({
+      ...this.state,
+      resetButtonHover: !this.state.resetButtonHover
+    });
   }
   render() {
+    let closeButtonStyle = styles.closeButton;
+    if (this.state.closeButtonHover) {
+      closeButtonStyle = styles.closeButtonHover;
+    }
+    let resetButtonStyle = styles.closeButton;
+    if (this.state.resetButtonHover) {
+      resetButtonStyle = styles.closeButtonHover;
+    }
     return (
       <Drawer open={this.props.toggled} type="persistent">
-        <Button onClick={this.props.close}>
-          <LeftIcon />Close
-        </Button>
-        <List style={{ width: 250 }}>
-          <ListItem button={true}>
-            <InboxIcon />
-            Inbox
+        <List style={styles.component}>
+          <ListItem
+            button={true}
+            onClick={this.props.close}
+            style={closeButtonStyle}
+            onMouseEnter={() => {
+              this.toggleClosebuttonHover();
+            }}
+            onMouseLeave={() => {
+              this.toggleClosebuttonHover();
+            }}
+          >
+            <LeftIcon />
           </ListItem>
-          <ListItem button={true}>
-            <DraftsIcon />
-            Drafts
+          <DestinationCard
+            title={'Origin'}
+            destination={this.props.originPoint}
+          />
+          <DestinationCard
+            title={'Destination'}
+            destination={this.props.destinationPoint}
+          />
+          <ListItem
+            button={true}
+            onClick={this.props.resetAndClose}
+            style={resetButtonStyle}
+            onMouseEnter={() => {
+              this.toggleResetButtonHover();
+            }}
+            onMouseLeave={() => {
+              this.toggleResetButtonHover();
+            }}
+          >
+            Reset
           </ListItem>
         </List>
       </Drawer>
@@ -32,8 +78,28 @@ class Sidebar extends React.Component<SidebarProps, any> {
   }
 }
 
+const styles = {
+  component: {
+    width: 250,
+    backgroundColor: 'rgb(240, 240, 240)'
+  },
+  closeButton: {
+    backgroundColor: 'rgb(240, 240, 240)'
+  },
+  closeButtonHover: {
+    backgroundColor: 'rgb(220, 220, 220)'
+  }
+};
 export default Sidebar;
+
 interface SidebarProps {
   toggled: boolean;
   close: any;
+  resetAndClose: any;
+  originPoint?: LngLat;
+  destinationPoint?: LngLat;
+}
+interface SidebarState {
+  closeButtonHover: boolean;
+  resetButtonHover: boolean;
 }
