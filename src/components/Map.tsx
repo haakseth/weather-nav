@@ -43,7 +43,7 @@ class Map extends React.Component<any, MapState> {
     return renderToString(<Popup lngLat={lngLat} />);
   }
   componentWillMount() {
-    fetch('http://freegeoip.net/json/')
+    fetch('https://freegeoip.net/json/')
       .then((response: any) => {
         var contentType = response.headers.get('content-type');
         if (contentType && contentType.includes('application/json')) {
