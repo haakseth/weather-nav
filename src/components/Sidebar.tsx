@@ -6,6 +6,7 @@ import List, { ListItem } from 'material-ui/List';
 import LeftIcon from 'material-ui-icons/ChevronLeft';
 import { LngLat } from 'mapbox-gl';
 import DestinationCard from './DestinationCard';
+import DirectionsCard from './DirectionsCard';
 
 class Sidebar extends React.Component<SidebarProps, SidebarState> {
   constructor(props: any) {
@@ -70,7 +71,10 @@ class Sidebar extends React.Component<SidebarProps, SidebarState> {
             title={'Destination'}
             destination={this.props.destinationPoint}
           />
-
+          <DirectionsCard
+            error={this.props.directionsError}
+            steps={this.props.directionSteps}
+          />
           {this.renderLoader()}
           <ListItem
             button={true}
@@ -112,6 +116,8 @@ interface SidebarProps {
   originPoint?: LngLat;
   destinationPoint?: LngLat;
   loading: boolean;
+  directionsError: string;
+  directionSteps: RouteStep[];
 }
 interface SidebarState {
   closeButtonHover: boolean;

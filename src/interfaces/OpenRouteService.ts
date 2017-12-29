@@ -3,7 +3,11 @@ interface Directions {
   bbox: Array<number>;
   info: DirectionsInfo;
   routes: Array<Route>;
-  error?: any;
+  error?: DirectionsError;
+}
+interface DirectionsError {
+  code: number;
+  message: string;
 }
 interface Route {
   bbox: Array<number>;

@@ -189,7 +189,8 @@ class Map extends React.Component<any, MapState> {
           } else {
             this.setState({
               ...this.state,
-              loading: false
+              loading: false,
+              directions: directions
             });
           }
         });
@@ -247,8 +248,11 @@ class Map extends React.Component<any, MapState> {
   componentWillUnmount() {
     this.map.remove();
   }
-
   render() {
+    let directionsError =
+      this.state.directions && this.state.directions.error
+        ? this.state.directions.error.message
+        : '';
     const style: any = {
       position: 'absolute',
       top: 0,
@@ -257,6 +261,14 @@ class Map extends React.Component<any, MapState> {
       zIndex: 1
     };
 
+    let steps = Array<RouteStep>();
+    if (this.state.directions && this.state.directions.routes) {
+      this.state.directions.routes[0].segments.forEach(segment => {
+        segment.steps.forEach(step => {
+          steps.push(step);
+        });
+      });
+    }
     return (
       <div>
         <Button
@@ -278,6 +290,8 @@ class Map extends React.Component<any, MapState> {
           originPoint={this.state.originPoint}
           destinationPoint={this.state.destinationPoint}
           loading={this.state.loading}
+          directionsError={directionsError}
+          directionSteps={steps}
         />
         <div style={style} ref={el => (this.mapContainer = el)} />
       </div>
