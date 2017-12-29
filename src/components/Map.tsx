@@ -203,7 +203,8 @@ class Map extends React.Component<any, MapState> {
         ...this.state,
         destinationPoint: undefined,
         originPoint: undefined,
-        directionsLayer: undefined
+        directionsLayer: undefined,
+        directions: undefined
       });
       this.addOriginOrDestination(lngLat);
     }
@@ -261,7 +262,7 @@ class Map extends React.Component<any, MapState> {
       zIndex: 1
     };
 
-    let steps = Array<RouteStep>();
+    let steps = new Array<RouteStep>();
     if (this.state.directions && this.state.directions.routes) {
       this.state.directions.routes[0].segments.forEach(segment => {
         segment.steps.forEach(step => {
