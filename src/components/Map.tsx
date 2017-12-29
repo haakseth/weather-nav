@@ -4,7 +4,7 @@ import * as React from 'react';
 import { renderToString } from 'react-dom/server';
 
 import * as mapboxgl from 'mapbox-gl';
-import { LngLat, MapMouseEvent, Marker } from 'mapbox-gl/dist/mapbox-gl';
+import { LngLat, MapMouseEvent, Marker, Layer } from 'mapbox-gl/dist/mapbox-gl';
 import polyline from '@mapbox/polyline';
 import 'mapbox-gl/dist/mapbox-gl.css';
 
@@ -35,7 +35,7 @@ class Map extends React.Component<any, MapState> {
       originPoint: undefined,
       mapMarkers: [],
       directions: undefined,
-      directionGeometry: undefined,
+      directionsLayer: undefined,
       loading: false
     };
   }
@@ -80,27 +80,8 @@ class Map extends React.Component<any, MapState> {
       removedMarker.remove();
     });
 
-    if (!this.state.directionGeometry && nextState.directionGeometry) {
-      this.map.addLayer({
-        id: 'route',
-        type: 'line',
-        source: {
-          type: 'geojson',
-          data: {
-            type: 'Feature',
-            properties: {},
-            geometry: nextState.directionGeometry
-          }
-        },
-        layout: {
-          'line-join': 'round',
-          'line-cap': 'round'
-        },
-        paint: {
-          'line-color': '#888',
-          'line-width': 8
-        }
-      });
+    if (!this.state.directionsLayer && nextState.directionsLayer) {
+      this.map.addLayer(nextState.directionsLayer);
     }
   }
 
@@ -126,6 +107,9 @@ class Map extends React.Component<any, MapState> {
   }
 
   resetAndClose() {
+    if (this.state.directionsLayer) {
+      this.map.removeLayer(this.state.directionsLayer.id);
+    }
     this.setState({
       ...this.state,
       originPoint: undefined,
@@ -133,6 +117,7 @@ class Map extends React.Component<any, MapState> {
       mapMarkers: [],
       sidebarToggled: false,
       directions: undefined,
+      directionsLayer: undefined,
       loading: false
     });
   }
@@ -175,19 +160,49 @@ class Map extends React.Component<any, MapState> {
         })
         .then((directions: Directions) => {
           console.log(directions);
-          this.setState({
-            ...this.state,
-            loading: false,
-            directions: directions,
-            directionGeometry: polyline.toGeoJSON(directions.routes[0].geometry)
-          });
+          if (!directions.error) {
+            this.setState({
+              ...this.state,
+              loading: false,
+              directions: directions,
+              directionsLayer: {
+                id: 'route_' + new Date(),
+                type: 'line',
+                source: {
+                  type: 'geojson',
+                  data: {
+                    type: 'Feature',
+                    properties: {},
+                    geometry: polyline.toGeoJSON(directions.routes[0].geometry)
+                  }
+                },
+                layout: {
+                  'line-join': 'round',
+                  'line-cap': 'round'
+                },
+                paint: {
+                  'line-color': '#888',
+                  'line-width': 8
+                }
+              }
+            });
+          } else {
+            this.setState({
+              ...this.state,
+              loading: false
+            });
+          }
         });
       // start over:
     } else {
+      if (this.state.directionsLayer) {
+        this.map.removeLayer(this.state.directionsLayer.id);
+      }
       this.setState({
         ...this.state,
         destinationPoint: undefined,
-        originPoint: undefined
+        originPoint: undefined,
+        directionsLayer: undefined
       });
       this.addOriginOrDestination(lngLat);
     }
@@ -282,5 +297,5 @@ interface MapState {
   mapMarkers: Array<Marker>;
   directions?: Directions;
   loading: boolean;
-  directionGeometry: any;
+  directionsLayer?: Layer;
 }
