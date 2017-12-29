@@ -5,7 +5,7 @@ import { renderToString } from 'react-dom/server';
 
 import * as mapboxgl from 'mapbox-gl';
 import { LngLat, MapMouseEvent, Marker, Layer } from 'mapbox-gl/dist/mapbox-gl';
-import { polyline } from '@mapbox/polyline';
+import polyline from '@mapbox/polyline';
 import 'mapbox-gl/dist/mapbox-gl.css';
 
 import Button from 'material-ui/IconButton';
