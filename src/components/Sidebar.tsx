@@ -1,5 +1,6 @@
 /* tslint:disable no-any */
 import * as React from 'react';
+import { CircularProgress } from 'material-ui/Progress';
 import Drawer from 'material-ui/Drawer';
 import List, { ListItem } from 'material-ui/List';
 import LeftIcon from 'material-ui-icons/ChevronLeft';
@@ -25,6 +26,16 @@ class Sidebar extends React.Component<SidebarProps, SidebarState> {
       ...this.state,
       resetButtonHover: !this.state.resetButtonHover
     });
+  }
+  renderLoader() {
+    if (this.props.loading) {
+      return (
+        <ListItem>
+          <CircularProgress />
+        </ListItem>
+      );
+    }
+    return <ListItem />;
   }
   render() {
     let closeButtonStyle = styles.closeButton;
@@ -59,6 +70,8 @@ class Sidebar extends React.Component<SidebarProps, SidebarState> {
             title={'Destination'}
             destination={this.props.destinationPoint}
           />
+
+          {this.renderLoader()}
           <ListItem
             button={true}
             onClick={this.props.resetAndClose}
@@ -98,6 +111,7 @@ interface SidebarProps {
   resetAndClose: any;
   originPoint?: LngLat;
   destinationPoint?: LngLat;
+  loading: boolean;
 }
 interface SidebarState {
   closeButtonHover: boolean;

@@ -2,14 +2,22 @@
 /* tslint:disable no-console */
 import * as React from 'react';
 import { renderToString } from 'react-dom/server';
+
 import * as mapboxgl from 'mapbox-gl';
+import { LngLat, MapMouseEvent, Marker } from 'mapbox-gl/dist/mapbox-gl';
+import polyline from '@mapbox/polyline';
 import 'mapbox-gl/dist/mapbox-gl.css';
-import config from '../config.json';
+
 import Button from 'material-ui/IconButton';
 import MenuIcon from 'material-ui-icons/Menu';
+
+import config from '../config.json';
+
 import Sidebar from './Sidebar';
 import Popup from './Popup';
-import { LngLat, MapMouseEvent, Marker } from 'mapbox-gl/dist/mapbox-gl';
+
+import '../interfaces/OpenRouteService';
+import '../interfaces/GeoIp';
 
 (mapboxgl as any).accessToken = config.mapboxToken;
 
@@ -25,7 +33,10 @@ class Map extends React.Component<any, MapState> {
       sidebarToggled: false,
       destinationPoint: undefined,
       originPoint: undefined,
-      mapMarkers: []
+      mapMarkers: [],
+      directions: undefined,
+      directionGeometry: undefined,
+      loading: false
     };
   }
   renderPopupHtml(lngLat: LngLat) {
@@ -68,6 +79,29 @@ class Map extends React.Component<any, MapState> {
     removedMarkers.forEach(removedMarker => {
       removedMarker.remove();
     });
+
+    if (!this.state.directionGeometry && nextState.directionGeometry) {
+      this.map.addLayer({
+        id: 'route',
+        type: 'line',
+        source: {
+          type: 'geojson',
+          data: {
+            type: 'Feature',
+            properties: {},
+            geometry: nextState.directionGeometry
+          }
+        },
+        layout: {
+          'line-join': 'round',
+          'line-cap': 'round'
+        },
+        paint: {
+          'line-color': '#888',
+          'line-width': 8
+        }
+      });
+    }
   }
 
   toggleSidebar() {
@@ -97,7 +131,9 @@ class Map extends React.Component<any, MapState> {
       originPoint: undefined,
       destinationPoint: undefined,
       mapMarkers: [],
-      sidebarToggled: false
+      sidebarToggled: false,
+      directions: undefined,
+      loading: false
     });
   }
 
@@ -109,18 +145,44 @@ class Map extends React.Component<any, MapState> {
   }
 
   addOriginOrDestination(lngLat: LngLat) {
+    // add origin:
     if (!this.state.originPoint) {
       this.setState({
         ...this.state,
         originPoint: lngLat,
         sidebarToggled: true
       });
+      // add destination and fetch directions:
     } else if (!this.state.destinationPoint) {
       this.setState({
         ...this.state,
         destinationPoint: lngLat,
-        sidebarToggled: true
+        sidebarToggled: true,
+        loading: true
       });
+      fetch(
+        `https://api.openrouteservice.org/directions?api_key=${
+          config.openRoutingToken
+        }&coordinates=${this.state.originPoint.lng}%2C${
+          this.state.originPoint.lat
+        }%7C${lngLat.lng}%2C${lngLat.lat}&profile=driving-car`
+      )
+        .then((response: any) => {
+          var contentType = response.headers.get('content-type');
+          if (contentType && contentType.includes('application/json')) {
+            return response.json();
+          }
+        })
+        .then((directions: Directions) => {
+          console.log(directions);
+          this.setState({
+            ...this.state,
+            loading: false,
+            directions: directions,
+            directionGeometry: polyline.toGeoJSON(directions.routes[0].geometry)
+          });
+        });
+      // start over:
     } else {
       this.setState({
         ...this.state,
@@ -200,6 +262,7 @@ class Map extends React.Component<any, MapState> {
           }}
           originPoint={this.state.originPoint}
           destinationPoint={this.state.destinationPoint}
+          loading={this.state.loading}
         />
         <div style={style} ref={el => (this.mapContainer = el)} />
       </div>
@@ -217,17 +280,7 @@ interface MapState {
   originPoint?: LngLat;
   destinationPoint?: LngLat;
   mapMarkers: Array<Marker>;
-}
-interface GeoIp {
-  ip: string;
-  country_code: string;
-  country_name: string;
-  region_code: string;
-  region_name: string;
-  city: string;
-  zip_code: string;
-  time_zone: string;
-  latitude: number;
-  longitude: number;
-  metro_code: number;
+  directions?: Directions;
+  loading: boolean;
+  directionGeometry: any;
 }
