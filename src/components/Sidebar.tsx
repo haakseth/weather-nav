@@ -5,6 +5,7 @@ import MediaQuery from 'react-responsive';
 import { CircularProgress } from 'material-ui/Progress';
 import List, { ListItem } from 'material-ui/List';
 import LeftIcon from 'material-ui-icons/ChevronLeft';
+import DownIcon from 'material-ui-icons/KeyboardArrowDown';
 import { LngLat } from 'mapbox-gl';
 import DestinationCard from './DestinationCard';
 import DirectionsCard from './DirectionsCard';
@@ -61,7 +62,12 @@ class Sidebar extends React.Component<SidebarProps, SidebarState> {
             this.toggleClosebuttonHover();
           }}
         >
-          <LeftIcon />
+          <MediaQuery query="(min-width: 600px)">
+            <LeftIcon />
+          </MediaQuery>
+          <MediaQuery query="(max-width: 600px)">
+            <DownIcon />
+          </MediaQuery>
         </ListItem>
         <DestinationCard
           title={'Origin'}
@@ -94,16 +100,44 @@ class Sidebar extends React.Component<SidebarProps, SidebarState> {
   }
   renderSidebar(smallScreen: boolean) {
     if (smallScreen) {
-      return (
-        <div
-          style={{
-            ...styles.component,
-            ...styles.componentSmallScreen
-          }}
-        >
-          <List>{this.renderList()}</List>
-        </div>
-      );
+      switch (this.props.drawerHeight) {
+        case DrawerHeight.short:
+          return (
+            <div
+              style={{
+                ...styles.component,
+                ...styles.componentSmallScreen,
+                height: '20%'
+              }}
+            >
+              <List>{this.renderList()}</List>
+            </div>
+          );
+        case DrawerHeight.medium:
+          return (
+            <div
+              style={{
+                ...styles.component,
+                ...styles.componentSmallScreen,
+                height: '60%'
+              }}
+            >
+              <List>{this.renderList()}</List>
+            </div>
+          );
+        default:
+          return (
+            <div
+              style={{
+                ...styles.component,
+                ...styles.componentSmallScreen,
+                height: '90%'
+              }}
+            >
+              <List>{this.renderList()}</List>
+            </div>
+          );
+      }
     }
     return (
       <div style={styles.component}>
@@ -164,6 +198,12 @@ interface SidebarProps {
   loading: boolean;
   directionsError: string;
   directionSteps: RouteStep[];
+  drawerHeight: DrawerHeight;
+}
+export enum DrawerHeight {
+  short,
+  medium,
+  full
 }
 interface SidebarState {
   closeButtonHover: boolean;
