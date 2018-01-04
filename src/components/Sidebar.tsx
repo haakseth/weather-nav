@@ -6,6 +6,7 @@ import { CircularProgress } from 'material-ui/Progress';
 import List, { ListItem } from 'material-ui/List';
 import LeftIcon from 'material-ui-icons/ChevronLeft';
 import DownIcon from 'material-ui-icons/KeyboardArrowDown';
+import UpIcon from 'material-ui-icons/KeyboardArrowUp';
 import { LngLat } from 'mapbox-gl';
 import DestinationCard from './DestinationCard';
 import DirectionsCard from './DirectionsCard';
@@ -15,7 +16,8 @@ class Sidebar extends React.Component<SidebarProps, SidebarState> {
     super(props);
     this.state = {
       closeButtonHover: false,
-      resetButtonHover: false
+      resetButtonHover: false,
+      drawerHeight: DrawerHeight.medium
     };
   }
   toggleClosebuttonHover() {
@@ -40,6 +42,103 @@ class Sidebar extends React.Component<SidebarProps, SidebarState> {
     }
     return <ListItem />;
   }
+  downButtonClicked() {
+    switch (this.state.drawerHeight) {
+      case DrawerHeight.full:
+        this.setState({
+          ...this.state,
+          drawerHeight: DrawerHeight.medium
+        });
+        break;
+      case DrawerHeight.medium:
+        this.setState({
+          ...this.state,
+          drawerHeight: DrawerHeight.short
+        });
+        break;
+      default:
+        this.props.close();
+        break;
+    }
+  }
+  upButtonClicked() {
+    switch (this.state.drawerHeight) {
+      case DrawerHeight.short:
+        this.setState({
+          ...this.state,
+          drawerHeight: DrawerHeight.medium
+        });
+        break;
+      case DrawerHeight.medium:
+        this.setState({
+          ...this.state,
+          drawerHeight: DrawerHeight.full
+        });
+        break;
+      default:
+        break;
+    }
+  }
+
+  renderUpDownButtons() {
+    switch (this.state.drawerHeight) {
+      case DrawerHeight.medium:
+        return (
+          <div>
+            <ListItem
+              button={true}
+              onClick={() => {
+                this.upButtonClicked();
+              }}
+            >
+              <UpIcon />
+            </ListItem>
+            <ListItem
+              button={true}
+              onClick={() => {
+                this.downButtonClicked();
+              }}
+            >
+              <DownIcon />
+            </ListItem>
+          </div>
+        );
+      case DrawerHeight.full:
+        return (
+          <div>
+            <ListItem
+              button={true}
+              onClick={() => {
+                this.downButtonClicked();
+              }}
+            >
+              <DownIcon />
+            </ListItem>
+          </div>
+        );
+      default:
+        return (
+          <div>
+            <ListItem
+              button={true}
+              onClick={() => {
+                this.upButtonClicked();
+              }}
+            >
+              <UpIcon />
+            </ListItem>
+            <ListItem
+              button={true}
+              onClick={() => {
+                this.downButtonClicked();
+              }}
+            >
+              <DownIcon />
+            </ListItem>
+          </div>
+        );
+    }
+  }
   renderList() {
     let closeButtonStyle = styles.closeButton;
     if (this.state.closeButtonHover) {
@@ -51,24 +150,25 @@ class Sidebar extends React.Component<SidebarProps, SidebarState> {
     }
     return (
       <div>
-        <ListItem
-          button={true}
-          onClick={this.props.close}
-          style={closeButtonStyle}
-          onMouseEnter={() => {
-            this.toggleClosebuttonHover();
-          }}
-          onMouseLeave={() => {
-            this.toggleClosebuttonHover();
-          }}
-        >
-          <MediaQuery query="(min-width: 600px)">
+        <MediaQuery query="(min-width: 600px)">
+          <ListItem
+            button={true}
+            onClick={this.props.close}
+            style={closeButtonStyle}
+            onMouseEnter={() => {
+              this.toggleClosebuttonHover();
+            }}
+            onMouseLeave={() => {
+              this.toggleClosebuttonHover();
+            }}
+          >
             <LeftIcon />
-          </MediaQuery>
-          <MediaQuery query="(max-width: 600px)">
-            <DownIcon />
-          </MediaQuery>
-        </ListItem>
+          </ListItem>
+        </MediaQuery>
+
+        <MediaQuery query="(max-width: 600px)">
+          {this.renderUpDownButtons()}
+        </MediaQuery>
         <DestinationCard
           title={'Origin'}
           destination={this.props.originPoint}
@@ -100,7 +200,7 @@ class Sidebar extends React.Component<SidebarProps, SidebarState> {
   }
   renderSidebar(smallScreen: boolean) {
     if (smallScreen) {
-      switch (this.props.drawerHeight) {
+      switch (this.state.drawerHeight) {
         case DrawerHeight.short:
           return (
             <div
@@ -166,7 +266,7 @@ const styles = {
   component: {
     height: '100%',
     top: 0,
-    width: 250,
+    width: 300,
     position: 'fixed' as 'fixed',
     zIndex: 2,
     left: 0,
@@ -198,9 +298,8 @@ interface SidebarProps {
   loading: boolean;
   directionsError: string;
   directionSteps: RouteStep[];
-  drawerHeight: DrawerHeight;
 }
-export enum DrawerHeight {
+enum DrawerHeight {
   short,
   medium,
   full
@@ -208,4 +307,5 @@ export enum DrawerHeight {
 interface SidebarState {
   closeButtonHover: boolean;
   resetButtonHover: boolean;
+  drawerHeight: DrawerHeight;
 }

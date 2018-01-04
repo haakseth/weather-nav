@@ -13,7 +13,7 @@ import MenuIcon from 'material-ui-icons/Menu';
 
 import config from '../config.json';
 
-import Sidebar, { DrawerHeight } from './Sidebar';
+import Sidebar from './Sidebar';
 import Popup from './Popup';
 
 import '../interfaces/OpenRouteService';
@@ -293,7 +293,6 @@ class Map extends React.Component<any, MapState> {
           loading={this.state.loading}
           directionsError={directionsError}
           directionSteps={steps}
-          drawerHeight={DrawerHeight.medium}
         />
         <div style={style} ref={el => (this.mapContainer = el)} />
       </div>
