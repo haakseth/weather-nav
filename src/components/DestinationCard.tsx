@@ -32,9 +32,10 @@ class DestinationCard extends React.Component<
   }
   render() {
     let style = styles.component;
-    if (this.state.mouseHover) {
-      style = styles.hover;
-    }
+    // Uncomment to let card change color on mouse hover
+    // if (this.state.mouseHover) {
+    //   style = styles.hover;
+    // }
     return (
       <div>
         <Card

@@ -4,7 +4,7 @@ import MediaQuery from 'react-responsive';
 
 import { CircularProgress } from 'material-ui/Progress';
 import List, { ListItem } from 'material-ui/List';
-import Button from 'material-ui/Button';
+import IconButton from 'material-ui/IconButton';
 import LeftIcon from 'material-ui-icons/ChevronLeft';
 import DownIcon from 'material-ui-icons/KeyboardArrowDown';
 import UpIcon from 'material-ui-icons/KeyboardArrowUp';
@@ -152,8 +152,7 @@ class Sidebar extends React.Component<SidebarProps, SidebarState> {
               justifyContent: 'space-between'
             }}
           >
-            <Button
-              style={{ left: 0 }}
+            <IconButton
               onClick={this.props.close}
               onMouseEnter={() => {
                 this.toggleClosebuttonHover();
@@ -163,36 +162,40 @@ class Sidebar extends React.Component<SidebarProps, SidebarState> {
               }}
             >
               <LeftIcon />
-            </Button>
-            <Button style={{ right: 0 }} onClick={this.props.resetAndClose}>
+            </IconButton>
+            <IconButton onClick={this.props.resetAndClose}>
               <CloseIcon />
-            </Button>
+            </IconButton>
           </div>
         </MediaQuery>
 
         <MediaQuery query="(max-width: 600px)">
           {this.renderUpDownButtons()}
         </MediaQuery>
-        <DestinationCard
-          title={'Origin'}
-          destination={this.props.originPoint}
-        />
-        <DestinationCard
-          title={'Destination'}
-          destination={this.props.destinationPoint}
-        />
-        <DirectionsCard
-          error={this.props.directionsError}
-          steps={this.props.directionSteps}
-        />
-        {this.renderLoader()}
-        <ListItem
-          button={true}
-          onClick={this.props.resetAndClose}
-          style={styles.closeButton}
-        >
-          Reset
-        </ListItem>
+        <List style={{ paddingTop: 0 }}>
+          <DestinationCard
+            title={'Origin'}
+            destination={this.props.originPoint}
+          />
+          <DestinationCard
+            title={'Destination'}
+            destination={this.props.destinationPoint}
+          />
+          <DirectionsCard
+            error={this.props.directionsError}
+            steps={this.props.directionSteps}
+          />
+          {this.renderLoader()}
+          <MediaQuery query="(max-width: 600px)">
+            <ListItem
+              button={true}
+              onClick={this.props.resetAndClose}
+              style={styles.closeButton}
+            >
+              Reset
+            </ListItem>
+          </MediaQuery>
+        </List>
       </div>
     );
   }
@@ -208,7 +211,7 @@ class Sidebar extends React.Component<SidebarProps, SidebarState> {
                 height: '20%'
               }}
             >
-              <List>{this.renderList()}</List>
+              {this.renderList()}
             </div>
           );
         case DrawerHeight.medium:
@@ -220,7 +223,7 @@ class Sidebar extends React.Component<SidebarProps, SidebarState> {
                 height: '60%'
               }}
             >
-              <List>{this.renderList()}</List>
+              {this.renderList()}
             </div>
           );
         default:
@@ -232,25 +235,17 @@ class Sidebar extends React.Component<SidebarProps, SidebarState> {
                 height: '90%'
               }}
             >
-              <List>{this.renderList()}</List>
+              {this.renderList()}
             </div>
           );
       }
     }
-    return (
-      <div style={styles.component}>
-        <List>{this.renderList()}</List>
-      </div>
-    );
+    return <div style={styles.component}>{this.renderList()}</div>;
   }
   render() {
     if (this.props.toggled) {
       return (
-        <div
-          style={{
-            display: 'flex'
-          }}
-        >
+        <div>
           <MediaQuery query="(min-width: 600px)">
             {this.renderSidebar(false)}
           </MediaQuery>
