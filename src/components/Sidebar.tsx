@@ -4,9 +4,11 @@ import MediaQuery from 'react-responsive';
 
 import { CircularProgress } from 'material-ui/Progress';
 import List, { ListItem } from 'material-ui/List';
+import Button from 'material-ui/Button';
 import LeftIcon from 'material-ui-icons/ChevronLeft';
 import DownIcon from 'material-ui-icons/KeyboardArrowDown';
 import UpIcon from 'material-ui-icons/KeyboardArrowUp';
+import CloseIcon from 'material-ui-icons/Close';
 import { LngLat } from 'mapbox-gl';
 import DestinationCard from './DestinationCard';
 import DirectionsCard from './DirectionsCard';
@@ -140,30 +142,32 @@ class Sidebar extends React.Component<SidebarProps, SidebarState> {
     }
   }
   renderList() {
-    let closeButtonStyle = styles.closeButton;
-    if (this.state.closeButtonHover) {
-      closeButtonStyle = styles.closeButtonHover;
-    }
-    let resetButtonStyle = styles.closeButton;
-    if (this.state.resetButtonHover) {
-      resetButtonStyle = styles.closeButtonHover;
-    }
     return (
       <div>
         <MediaQuery query="(min-width: 600px)">
-          <ListItem
-            button={true}
-            onClick={this.props.close}
-            style={closeButtonStyle}
-            onMouseEnter={() => {
-              this.toggleClosebuttonHover();
-            }}
-            onMouseLeave={() => {
-              this.toggleClosebuttonHover();
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'row',
+              justifyContent: 'space-between'
             }}
           >
-            <LeftIcon />
-          </ListItem>
+            <Button
+              style={{ left: 0 }}
+              onClick={this.props.close}
+              onMouseEnter={() => {
+                this.toggleClosebuttonHover();
+              }}
+              onMouseLeave={() => {
+                this.toggleClosebuttonHover();
+              }}
+            >
+              <LeftIcon />
+            </Button>
+            <Button style={{ right: 0 }} onClick={this.props.resetAndClose}>
+              <CloseIcon />
+            </Button>
+          </div>
         </MediaQuery>
 
         <MediaQuery query="(max-width: 600px)">
@@ -185,13 +189,7 @@ class Sidebar extends React.Component<SidebarProps, SidebarState> {
         <ListItem
           button={true}
           onClick={this.props.resetAndClose}
-          style={resetButtonStyle}
-          onMouseEnter={() => {
-            this.toggleResetButtonHover();
-          }}
-          onMouseLeave={() => {
-            this.toggleResetButtonHover();
-          }}
+          style={styles.closeButton}
         >
           Reset
         </ListItem>
@@ -248,7 +246,11 @@ class Sidebar extends React.Component<SidebarProps, SidebarState> {
   render() {
     if (this.props.toggled) {
       return (
-        <div style={{ flex: 1 }}>
+        <div
+          style={{
+            display: 'flex'
+          }}
+        >
           <MediaQuery query="(min-width: 600px)">
             {this.renderSidebar(false)}
           </MediaQuery>

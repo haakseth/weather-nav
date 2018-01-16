@@ -30,7 +30,7 @@ class DirectionsCard extends React.Component<
   render() {
     let style = styles.component;
     if (this.state.mouseHover) {
-      style = styles.hover;
+      // style = styles.hover;
     }
     return (
       <div>
