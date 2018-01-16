@@ -5,6 +5,7 @@ import MediaQuery from 'react-responsive';
 import { CircularProgress } from 'material-ui/Progress';
 import List, { ListItem } from 'material-ui/List';
 import IconButton from 'material-ui/IconButton';
+import Tooltip from 'material-ui/Tooltip';
 import LeftIcon from 'material-ui-icons/ChevronLeft';
 import DownIcon from 'material-ui-icons/KeyboardArrowDown';
 import UpIcon from 'material-ui-icons/KeyboardArrowUp';
@@ -152,20 +153,35 @@ class Sidebar extends React.Component<SidebarProps, SidebarState> {
               justifyContent: 'space-between'
             }}
           >
-            <IconButton
-              onClick={this.props.close}
-              onMouseEnter={() => {
-                this.toggleClosebuttonHover();
-              }}
-              onMouseLeave={() => {
-                this.toggleClosebuttonHover();
-              }}
+            <Tooltip
+              id="tooltip-icon"
+              title="Hide sidebar"
+              enterDelay={300}
+              leaveDelay={300}
             >
-              <LeftIcon />
-            </IconButton>
-            <IconButton onClick={this.props.resetAndClose}>
-              <CloseIcon />
-            </IconButton>
+              <IconButton
+                onClick={this.props.close}
+                onMouseEnter={() => {
+                  this.toggleClosebuttonHover();
+                }}
+                onMouseLeave={() => {
+                  this.toggleClosebuttonHover();
+                }}
+              >
+                <LeftIcon />
+              </IconButton>
+            </Tooltip>
+
+            <Tooltip
+              id="tooltip-icon"
+              title="Reset and close sidebar"
+              enterDelay={300}
+              leaveDelay={300}
+            >
+              <IconButton onClick={this.props.resetAndClose}>
+                <CloseIcon />
+              </IconButton>
+            </Tooltip>
           </div>
         </MediaQuery>
 
